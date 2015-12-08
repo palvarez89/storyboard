@@ -14,6 +14,7 @@
 # limitations under the License.
 
 from oslo_config import cfg
+from oslo_log import log
 from pecan import abort
 from pecan import request
 from pecan import response
@@ -37,6 +38,7 @@ from storyboard.db.api import timeline_events as events_api
 from storyboard.openstack.common.gettextutils import _  # noqa
 
 CONF = cfg.CONF
+LOG = log.getLogger(__name__)
 
 SEARCH_ENGINE = search_engine.get_engine()
 
@@ -204,8 +206,10 @@ def post_timeline_events(original_task, updated_task):
 
         author_id = request.current_user_id
         specific_change = False
-
+        LOG.warn(author_id)
+        LOG.warn("%s =? %s" % (original_task.status, updated_task.status))
         if original_task.status != updated_task.status:
+            LOG.warn("status changed")
             events_api.task_status_changed_event(
                 story_id=original_task.story_id,
                 task_id=original_task.id,
@@ -215,7 +219,9 @@ def post_timeline_events(original_task, updated_task):
                 new_status=updated_task.status)
             specific_change = True
 
+        LOG.warn("%s =? %s" % (original_task.priority, updated_task.priority))
         if original_task.priority != updated_task.priority:
+            LOG.warn("priority changed")
             events_api.task_priority_changed_event(
                 story_id=original_task.story_id,
                 task_id=original_task.id,
@@ -225,7 +231,9 @@ def post_timeline_events(original_task, updated_task):
                 new_priority=updated_task.priority)
             specific_change = True
 
+        LOG.warn("%s =? %s" % (original_task.assignee_id, updated_task.assignee_id))
         if original_task.assignee_id != updated_task.assignee_id:
+            LOG.warn("assignee changed")
             events_api.task_assignee_changed_event(
                 story_id=original_task.story_id,
                 task_id=original_task.id,
@@ -236,6 +244,7 @@ def post_timeline_events(original_task, updated_task):
             specific_change = True
 
         if not specific_change:
+            LOG.warn("not specific!")
             events_api.task_details_changed_event(
                 story_id=original_task.story_id,
                 task_id=original_task.id,
@@ -365,16 +374,27 @@ class TasksPrimaryController(rest.RestController):
         :param task_id: An ID of the task.
         :param task: A task within the request body.
         """
-
         original_task = tasks_api.task_get(task_id)
+        LOG.warn("put1 - status = %s" % (original_task.status))
+        LOG.warn(original_task)
 
         if not original_task:
             raise exc.NotFound(_("Task %s not found.") % task_id)
+        LOG.warn("put2 - status = %s" % (original_task.status))
+        LOG.warn(original_task)
 
         task = task_is_valid_put(task, original_task)
+        LOG.warn("put3 - status = %s" % (original_task.status))
+        LOG.warn(original_task)
 
         updated_task = tasks_api.task_update(task_id, task.as_dict(
             omit_unset=True))
+        LOG.warn("put4 - status = %s" % (original_task.status))
+        LOG.warn(original_task)
+
+        LOG.warn("put5 - %s =? %s" % (original_task.status, updated_task.status))
+        LOG.warn(original_task)
+        LOG.warn(updated_task)
 
         post_timeline_events(original_task, updated_task)
         return wmodels.Task.from_db_model(updated_task)
