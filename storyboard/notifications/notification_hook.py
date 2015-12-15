@@ -123,7 +123,7 @@ class NotificationHook(hooks.PecanHook):
             return None
 
     def parse(self, s):
-        url_pattern = re.match("^\/v1\/([a-z_]+)\/?([0-9]+)?"
+        url_pattern = re.match("^\/api\/v1\/([a-z_]+)\/?([0-9]+)?"
                                "\/?([a-z]+)?\/?([0-9]+)?$", s)
         if not url_pattern or url_pattern.groups()[0] == "openid":
             return None, None, None, None

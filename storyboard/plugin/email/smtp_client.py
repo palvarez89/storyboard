@@ -33,12 +33,14 @@ class get_smtp_client(object):
         # SSL or not SSL?
         if not email_config.smtp_ssl_certfile \
                 or not email_config.smtp_ssl_keyfile:
+            LOG.warning("MAIL - no ssl")
             self.s = smtplib.SMTP(host=email_config.smtp_host,
                                   port=email_config.smtp_port,
                                   local_hostname=
                                   email_config.smtp_local_hostname,
                                   timeout=email_config.smtp_timeout)
         else:
+            LOG.warning("MAIL - ssl")
             self.s = smtplib.SMTP_SSL(host=email_config.smtp_host,
                                       port=email_config.smtp_port,
                                       keyfile=email_config.smtp_ssl_keyfile,
@@ -49,6 +51,7 @@ class get_smtp_client(object):
 
         # Do we need to log in?
         if email_config.smtp_user and email_config.smtp_password:
+            LOG.warning("MAIL - using user and password")
             self.s.login(email_config.smtp_user,
                          email_config.smtp_password)
 

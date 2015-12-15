@@ -64,22 +64,27 @@ class EmailWorkerBase(EmailPluginBase, WorkerTaskBase):
         :param resource_before: The resource state before this event occurred.
         :param resource_after: The resource state after this event occurred.
         """
+        LOG.warning("MAIL - start handle")
 
         # We only care about a subset of resource types.
         if resource not in ['task', 'project_group', 'project', 'story',
                             'branch', 'milestone', 'tag']:
+            LOG.warning("MAIL - resource  %s not in ..." % resource)
             return
 
         # We only care about PUT, POST, and DELETE requests that do not
         # result in errors or redirects.
         if method == 'GET' or status >= 300:
+            LOG.warning("MAIL - method %s or status %s not supported" % (method, status))
             return
 
         # We only care if the current resource has subscribers.
         subscribers = self.get_subscribers(session, resource, resource_id)
         if not subscribers:
+            LOG.warning("MAIL - no subscibers")
             return
 
+        LOG.warning("MAIL - calling handle_email")
         # Pass our values on to the handler.
         self.handle_email(session=session,
                           author=author,
@@ -212,6 +217,7 @@ class SubscriptionEmailWorker(EmailWorkerBase):
         :param resource_after: The resource state after this event occurred.
         """
 
+        LOG.warning("MAIL - start handle_email")
         email_config = CONF.plugin_email
 
         # Retrieve the template names.
