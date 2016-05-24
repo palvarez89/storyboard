@@ -150,6 +150,7 @@ class User(FullText, ModelBuilder, Base):
     is_staff = Column(Boolean, default=False)
     is_active = Column(Boolean, default=True)
     is_superuser = Column(Boolean, default=False)
+    is_automation_user = Column(Boolean, default=False)
     last_login = Column(UTCDateTime)
     teams = relationship("Team", secondary="team_membership")
     permissions = relationship(

@@ -163,6 +163,9 @@ class User(base.APIBase):
     is_superuser = bool
     """Whether or not the user has superuser permissions."""
 
+    is_automation_user = bool
+    """Whether or not the user is for automation."""
+
     last_login = datetime
     """Date of the last login."""
 
@@ -179,6 +182,7 @@ class User(base.APIBase):
             is_staff=False,
             is_active=True,
             is_superuser=True,
+            is_automation_user=False,
             last_login=datetime(2014, 1, 1, 16, 42))
 
 
