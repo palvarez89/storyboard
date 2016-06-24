@@ -19,9 +19,11 @@ import os
 import six
 import smtplib
 
+from email.utils import make_msgid
 from jinja2.exceptions import TemplateNotFound
 from oslo_config import cfg
 from oslo_log import log
+from socket import getfqdn
 
 import storyboard.db.api.base as db_base
 from storyboard.db.api.subscriptions import subscription_get_all_subscriber_ids
@@ -91,11 +93,28 @@ class EmailWorkerBase(EmailPluginBase, WorkerTaskBase):
         if not subscribers:
             return
 
+        # Generate In-Reply-To message id for 'task' and 'story' resources
+        if resource == 'task':
+            message_id = "<storyboard.story.%s.%s@%s>" % (
+                resource.story.created_at,
+                resource.story.id,
+                getfqdn()
+            )
+        elif resource == 'story':
+            message_id = "<storyboard.story.%s.%s@%s>" % (
+                resource.created_at,
+                resource.id,
+                getfqdn()
+            )
+        else:
+            message_id = make_msgid()
+
         # Pass our values on to the handler.
         self.handle_email(session=session,
                           author=author,
                           subscribers=subscribers,
                           method=method,
+                          message_id=message_id,
                           url=url,
                           status=status,
                           path=path,
