@@ -276,7 +276,7 @@ class SubscriptionEmailWorker(EmailWorkerBase):
             created_at = self.resolve_resource_by_name(session, 'story',
                 story_id).created_at
         elif resource == 'task':
-            story_id = resource_instance.story.id,
+            story_id = resource_instance.story.id
             created_at = resource_instance.story.created_at
         elif resource == 'story':
             story_id = resource_instance.id
