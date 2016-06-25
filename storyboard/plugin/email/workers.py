@@ -268,16 +268,24 @@ class SubscriptionEmailWorker(EmailWorkerBase):
                                                               sub_resource_id)
 
         # Set In-Reply-To message id for 'task' and 'story' resources
-        if resource == 'task':
-            thread_id = "<storyboard.story.%s.%s@%s>" % (
-                resource_instance.story.created_at.strftime("%Y%m%d%H%M"),
-                resource_instance.story.id,
-                getfqdn()
-            )
+        if resource == 'task' and method == 'DELETE':
+            # FIXME(pedroalvarez): Workaround the fact that the task won't be
+            # in the database anymore if it has been deleted.
+            # We should archive instead of delete to solve this.
+            created_at = resource_before['created_at']
+            story_id = resource_before['story_id']
+        elif resource == 'task':
+            created_at = resource_instance.story.created_at
+            story_id = resource_instance.story_id,
         elif resource == 'story':
+            created_at = resource_instance.created_at
+            story_id = resource_instance_id
+
+        if story_id and created_at:
             thread_id = "<storyboard.story.%s.%s@%s>" % (
-                resource_instance.created_at.strftime("%Y%m%d%H%M"),
-                resource_instance.id,
+                created_at,
+                created_at.created_at.strftime("%Y%m%d%H%M")
+                story_id,
                 getfqdn()
             )
         else:
