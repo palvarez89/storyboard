@@ -270,13 +270,13 @@ class SubscriptionEmailWorker(EmailWorkerBase):
         # Set In-Reply-To message id for 'task' and 'story' resources
         if resource == 'task':
             thread_id = "<storyboard.story.%s.%s@%s>" % (
-                resource_instance.story.created_at,
+                resource_instance.story.created_at.strftime("%Y%m%d%H%M"),
                 resource_instance.story.id,
                 getfqdn()
             )
         elif resource == 'story':
             thread_id = "<storyboard.story.%s.%s@%s>" % (
-                resource_instance.created_at,
+                resource_instance.created_at.strftime("%Y%m%d%H%M"),
                 resource_instance.id,
                 getfqdn()
             )
