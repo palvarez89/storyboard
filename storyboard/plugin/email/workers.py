@@ -95,28 +95,26 @@ class EmailWorkerBase(EmailPluginBase, WorkerTaskBase):
 
         # Generate In-Reply-To message id for 'task' and 'story' resources
         if resource == 'task':
-            message_id = "<storyboard.story.%s.%s@%s>" % (
+            thread_id = "<storyboard.story.%s.%s@%s>" % (
                 resource.story.created_at,
                 resource.story.id,
                 getfqdn()
             )
         elif resource == 'story':
-            message_id = "<storyboard.story.%s.%s@%s>" % (
+            thread_id = "<storyboard.story.%s.%s@%s>" % (
                 resource.created_at,
                 resource.id,
                 getfqdn()
             )
         else:
-            message_id = make_msgid()
-
-        LOG.debug('Using message_id: "%s"' % (message_id))
+            thread_id = make_msgid()
 
         # Pass our values on to the handler.
         self.handle_email(session=session,
                           author=author,
                           subscribers=subscribers,
                           method=method,
-                          message_id=message_id,
+                          thread_id=thread_id,
                           url=url,
                           status=status,
                           path=path,
@@ -129,8 +127,8 @@ class EmailWorkerBase(EmailPluginBase, WorkerTaskBase):
                           resource_after=resource_after)
 
     @abc.abstractmethod
-    def handle_email(self, session, author, subscribers, method, url, path,
-                     query_string, status, resource, resource_id,
+    def handle_email(self, session, author, subscribers, method, thread_id,
+                     url, path, query_string, status, resource, resource_id,
                      sub_resource=None, sub_resource_id=None,
                      resource_before=None, resource_after=None):
         """Handle an email notification for the given subscribers.
@@ -139,6 +137,7 @@ class EmailWorkerBase(EmailPluginBase, WorkerTaskBase):
         :param author: The author's user record.
         :param subscribers: A list of subscribers that should receive an email.
         :param method: The HTTP Method.
+        :param thread_id: The Message-Id to use in the In-Reply-To header.
         :param url: The Referer header from the request.
         :param path: The full HTTP Path requested.
         :param query_string: The query string from the request.
@@ -225,8 +224,8 @@ class SubscriptionEmailWorker(EmailWorkerBase):
     have indicated that they wish to receive emails, but don't want digests.
     """
 
-    def handle_email(self, session, author, subscribers, method, url, path,
-                     query_string, status, resource, resource_id,
+    def handle_email(self, session, author, subscribers, method, thread_id,
+                     url, path, query_string, status, resource, resource_id,
                      sub_resource=None, sub_resource_id=None,
                      resource_before=None, resource_after=None):
         """Send an email for a specific event.
@@ -238,6 +237,7 @@ class SubscriptionEmailWorker(EmailWorkerBase):
         :param author: The author's user record.
         :param subscribers: A list of subscribers that should receive an email.
         :param method: The HTTP Method.
+        :param thread_id: The Message-Id to use in the In-Reply-To header.
         :param url: The Referer header from the request.
         :param path: The full HTTP Path requested.
         :param query_string: The query string from the request.
@@ -278,6 +278,9 @@ class SubscriptionEmailWorker(EmailWorkerBase):
         # If there's a reply-to in our config, add that.
         if email_config.reply_to:
             factory.add_header('Reply-To', email_config.reply_to)
+
+        # Add In-Reply-To header for threading
+        factory.add_header("In-Reply-To", thread_id)
 
         # Resolve the resource instance
         resource_instance = self.resolve_resource_by_name(session, resource,
