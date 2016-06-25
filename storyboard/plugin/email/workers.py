@@ -274,7 +274,7 @@ class SubscriptionEmailWorker(EmailWorkerBase):
             # We should archive instead of delete to solve this.
             story_id = resource_before['story_id']
             created_at = self.resolve_resource_by_name(session, 'story',
-                story_id).created_at)
+                story_id).created_at
         elif resource == 'task':
             story_id = resource_instance.story.id,
             created_at = resource_instance.story.created_at
