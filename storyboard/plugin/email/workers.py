@@ -283,7 +283,7 @@ class SubscriptionEmailWorker(EmailWorkerBase):
 
         if story_id and created_at:
             thread_id = "<storyboard.story.%s.%s@%s>" % (
-                created_at.created_at.strftime("%Y%m%d%H%M"),
+                created_at.strftime("%Y%m%d%H%M"),
                 story_id,
                 getfqdn()
             )
