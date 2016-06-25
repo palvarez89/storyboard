@@ -109,6 +109,8 @@ class EmailWorkerBase(EmailPluginBase, WorkerTaskBase):
         else:
             message_id = make_msgid()
 
+        LOG.debug('Using message_id: "%s"' % (message_id))
+
         # Pass our values on to the handler.
         self.handle_email(session=session,
                           author=author,
