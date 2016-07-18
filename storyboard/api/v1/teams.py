@@ -51,7 +51,16 @@ class UsersSubcontroller(rest.RestController):
         if not team:
             raise exc.NotFound(_("Team %s not found") % team_id)
 
-        return [wmodels.User.from_db_model(user) for user in team.users]
+        team_users = []
+        for user_id in team.users:
+            filter_non_public = True
+            if user_id == request.current_user_id:
+                filter_non_public = False
+
+            user = users_api.user_get(user_id, filter_non_public)
+            team_users.append(user)
+
+        return team_users
 
     @decorators.db_exceptions
     @secure(checks.superuser)
